@@ -34,7 +34,7 @@ class ChannelChain:
         }
 
         # Reset the current list of transactions
-        self.current_transactions = []
+        self.current_msgs = []
 
         self.chain.append(block)
         return block
@@ -120,6 +120,7 @@ class ChannelChain:
     @property
     def last_block(self):
         # Returns the last Block in the chain
+        p(self.chain)
         return self.chain[-1]
 
     @staticmethod
