@@ -55,6 +55,11 @@ class ChannelChain:
         return proof
 
     def valid_chain(self, chain):
+        # TODO we should validate also that the chain given is the same chain as we already have.
+        # Otherwise a foreign node can create an entire new chain from scratch and replace all
+        # messages with new messages (as long as the fake chain is longer than the current).
+        # But this may no longer be an issue with signed messages or changing the consensus to
+        # something like Proof of Authority
         last_block = chain[0]
         current_index = 1
 
