@@ -1,31 +1,36 @@
 #!/bin/bash
 
+set -x
+set -e
+
+# create channel
+chan=$(curl -sfH "Content-Type: application/json" -X POST -d '{"name": "general"}' "http://localhost:5001/channels/new" | jq -r .channel)
+
 # Connect nodes
-curl -H "Content-Type: application/json" -X POST -d '{"nodes":["http://node2:5000"]}' "http://localhost:5001/nodes/register"
-curl -H "Content-Type: application/json" -X POST -d '{"nodes":["http://node1:5000"]}' "http://localhost:5002/nodes/register"
+curl -fH "Content-Type: application/json" -X POST -d '{"remote_node": "http://node1:5000", "local_node": "http://node2:5000", "chan": "'"$chan"'"}' "http://localhost:5002/join"
 
 # add a message to the general chat
-curl -H "Content-Type: application/json" -X POST -d '{"sender": "user1", "message":"Hello World!"}' "http://localhost:5001/transactions/new"
-curl -H "Content-Type: application/json" -X POST -d '{"sender": "user2", "message":"Hello World also!"}' "http://localhost:5002/transactions/new"
+curl -fH "Content-Type: application/json" -X POST -d '{"sender": "user1", "message":"Hello World!"}' "http://localhost:5001/$chan/transactions/new"
+curl -fH "Content-Type: application/json" -X POST -d '{"sender": "user2", "message":"Hello World also!"}' "http://localhost:5002/$chan/transactions/new"
 
 # mine it
-curl "http://localhost:5001/mine"
+curl -f "http://localhost:5001/$chan/mine"
 
 # resolve
-curl "http://localhost:5001/nodes/resolve"
-curl "http://localhost:5002/nodes/resolve"
+curl -f "http://localhost:5001/$chan/nodes/resolve"
+curl -f "http://localhost:5002/$chan/nodes/resolve"
 
 # check chains
-curl "http://localhost:5001/chain"
-curl "http://localhost:5002/chain"
+curl -f "http://localhost:5001/$chan/chain"
+curl -f "http://localhost:5002/$chan/chain"
 
 # mine the second node
-curl "http://localhost:5002/mine"
+curl -f "http://localhost:5002/$chan/mine"
 
 # resolve
-curl "http://localhost:5001/nodes/resolve"
-curl "http://localhost:5002/nodes/resolve"
+curl -f "http://localhost:5001/$chan/nodes/resolve"
+curl -f "http://localhost:5002/$chan/nodes/resolve"
 
 # check chains
-curl "http://localhost:5001/chain"
-curl "http://localhost:5002/chain"
+curl -f "http://localhost:5001/$chan/chain"
+curl -f "http://localhost:5002/$chan/chain"
