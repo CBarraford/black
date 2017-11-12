@@ -179,7 +179,7 @@ def mine():
     )
 
     # Forge the new Block by adding it to the chain
-    block = chan_general.new_block(proof, last_block['previous_hash'])
+    block = chan_general.new_block(proof)
 
     response = {
         'message': "New Block Forged",
