@@ -18,3 +18,14 @@ curl "http://localhost:5002/nodes/resolve"
 # check chains
 curl "http://localhost:5001/chain"
 curl "http://localhost:5002/chain"
+
+# mine the second node
+curl "http://localhost:5002/mine"
+
+# resolve
+curl "http://localhost:5001/nodes/resolve"
+curl "http://localhost:5002/nodes/resolve"
+
+# check chains
+curl "http://localhost:5001/chain"
+curl "http://localhost:5002/chain"
