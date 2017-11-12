@@ -60,17 +60,12 @@ class ChannelChain:
 
         while current_index < len(chain):
             block = chain[current_index]
-            p(f'{last_block}')
-            p(f'{block}')
-            p("\n-----------\n")
             # Check that the hash of the block is correct
             if block['previous_hash'] != self.hash(last_block):
-                p("fail here1 | %s | %s" % (block['previous_hash'], self.hash(last_block)))
                 return False
 
             # Check that the Proof of Work is correct
             if not self.valid_proof(last_block['proof'], block['proof']):
-                p("fail here2")
                 return False
 
             last_block = block
@@ -84,11 +79,9 @@ class ChannelChain:
 
         # We're only looking for chains longer than ours
         max_length = len(self.chain)
-        p("max length: %d" % max_length)
 
         # Grab and verify the chains from all the nodes in our network
         for node in neighbours:
-            p("Node: %s" % node)
             response = requests.get(f'http://{node}/chain')
 
             if response.status_code == 200:
@@ -96,16 +89,12 @@ class ChannelChain:
                 chain = response.json()['chain']
 
                 # Check if the length is longer and the chain is valid
-                p("Length: %d" % length)
-                p("Max length: %d" % max_length)
-                p("Valid: %s" % self.valid_chain(chain))
                 if length > max_length and self.valid_chain(chain):
                     max_length = length
                     new_chain = chain
 
         # Replace our chain if we discovered a new, valid chain longer than ours
         if new_chain:
-            p("Replacing our chain....")
             self.chain = new_chain
             return True
 
@@ -120,7 +109,6 @@ class ChannelChain:
     @property
     def last_block(self):
         # Returns the last Block in the chain
-        p(self.chain)
         return self.chain[-1]
 
     @staticmethod
