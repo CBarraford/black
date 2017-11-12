@@ -6,9 +6,6 @@ service (similar to slack) utilizing the blockchain and P2P communication.
 This is built for academic purposes of exploring how blockchains work. Not
 recommended for production use.
 
-## Status
-Black is non-functional at the moment, in development....
-
 ### Development
 To run Black...
 
