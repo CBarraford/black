@@ -1,8 +1,12 @@
 import hashlib
+import sys
 from time import time
 from urllib.parse import urlparse
 import json
 import requests
+
+from ecdsa import VerifyingKey
+
 
 class Channel:
     def __init__(self, name):
@@ -40,13 +44,21 @@ class ChannelChain:
         self.chain.append(block)
         return block
 
-    def new_transaction(self, sender, msg):
+    def new_transaction(self, alias, pubKey, signature, msg):
+        if not self.verify_message(msg, pubKey, signature):
+            return 0
         self.current_msgs.append({
-            'sender': sender,
+            'alias': alias,
+            'public_key': pubKey,
+            'signature': signature,
             'msg': msg,
         })
 
         return self.last_block['index'] + 1
+
+    def verify_message(self, message, pubKey, signature):
+        vk = VerifyingKey.from_pem(pubKey)
+        return vk.verify(bytearray.fromhex(signature), message.encode("utf-8"))
 
     def proof_of_work(self, last_proof):
         proof = 0

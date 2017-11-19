@@ -75,17 +75,16 @@ def register_nodes(chan):
 
 @app.route('/<chan>/mine', methods=['GET'])
 def mine(chan):
+    # ensure we have messages to commit to the blockchain
+    if not black.CHANNELS[chan].chain.current_msgs:
+        response = {
+            'message': 'No messages to commit to the blockchain',
+        }
+        return jsonify(response), 200
     # We run the proof of work algorithm to get the next proof...
     last_block = black.CHANNELS[chan].chain.last_block
     last_proof = last_block['proof']
     proof = black.CHANNELS[chan].chain.proof_of_work(last_proof)
-
-    # We must receive a reward for finding the proof.
-    # The sender is "0" to signify that this node has mined a new coin.
-    black.CHANNELS[chan].chain.new_transaction(
-        sender=black.node_identifier,
-        msg="mined.",
-    )
 
     # Forge the new Block by adding it to the chain
     block = black.CHANNELS[chan].chain.new_block(proof)
@@ -123,12 +122,14 @@ def new_transaction(chan):
     values = request.get_json()
 
     # Check that the required fields are in the POST'ed data
-    required = ['sender', 'message']
+    required = ['alias', 'message', 'pub_key', 'signature']
     if not all(k in values for k in required):
-        return 'Missing values', 400
+        return 'Missing values {values["alias"]}', 400
 
     # Create a new Transaction
-    index = black.CHANNELS[chan].chain.new_transaction(values['sender'], values['message'])
+    index = black.CHANNELS[chan].chain.new_transaction(
+        values['alias'], values['pub_key'], values['signature'], values['message']
+    )
 
     response = {'message': f'Transaction will be added to Block {index}'}
     return jsonify(response), 201
