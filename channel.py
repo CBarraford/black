@@ -44,11 +44,10 @@ class ChannelChain:
         self.chain.append(block)
         return block
 
-    def new_transaction(self, alias, pubKey, signature, msg):
+    def new_transaction(self, pubKey, signature, msg):
         if not self.verify_message(msg, pubKey, signature):
             return 0
         self.current_msgs.append({
-            'alias': alias,
             'public_key': pubKey,
             'signature': signature,
             'msg': msg,

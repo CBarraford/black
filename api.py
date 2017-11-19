@@ -122,13 +122,13 @@ def new_transaction(chan):
     values = request.get_json()
 
     # Check that the required fields are in the POST'ed data
-    required = ['alias', 'message', 'pub_key', 'signature']
+    required = ['message', 'pub_key', 'signature']
     if not all(k in values for k in required):
-        return 'Missing values {values["alias"]}', 400
+        return 'Missing values', 400
 
     # Create a new Transaction
     index = black.CHANNELS[chan].chain.new_transaction(
-        values['alias'], values['pub_key'], values['signature'], values['message']
+        values['pub_key'], values['signature'], values['message']
     )
 
     response = {'message': f'Transaction will be added to Block {index}'}

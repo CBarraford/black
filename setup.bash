@@ -11,13 +11,11 @@ curl -fH "Content-Type: application/json" -X POST -d '{"remote_node": "http://no
 
 # add a message to the general chat
 curl -fH "Content-Type: application/json" -X POST -d '{
-  "alias": "user1", 
   "pub_key": "-----BEGIN PUBLIC KEY-----\nMEkwEwYHKoZIzj0CAQYIKoZIzj0DAQEDMgAEUCXFlazfro8jch6LGcKaTd/HSZvC\nKT0aIPceW8JsOS5M82FMzkMRrtfuG5Kgi/Pa\n-----END PUBLIC KEY-----\n", 
   "signature": "8312DC578E8249E10877877066E82223BF31AD48207B51EB3389AF9D625FD503F2136297751E92657D18580BCCAFED3C",
   "message":"Hello World!"}
   ' "http://localhost:5001/$chan/transactions/new"
 curl -fH "Content-Type: application/json" -X POST -d '{
-  "alias": "user2", 
   "pub_key": "-----BEGIN PUBLIC KEY-----\nMEkwEwYHKoZIzj0CAQYIKoZIzj0DAQEDMgAEmKKhw/PJNmDMqtpNRXexw+l+sand\nBwVSdC0AgZ/Pj2O5e4a3SRvYRoIbYPOUC/Fq\n-----END PUBLIC KEY-----\n", 
   "signature": "E5FFF16FB17B5EBA0240D4083AEB8EDF90AA9610627DF015C2023233987A455F11BDB6959C7D872EDE4ED6B4F22E8C8A",
   "message":"Hello World also!"}
