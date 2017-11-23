@@ -8,6 +8,7 @@ from flask import Flask, jsonify, request
 
 import black
 import channel
+import authority
 
 app = Flask(__name__)
 
@@ -73,45 +74,23 @@ def register_nodes(chan):
     return jsonify(response), 201
 
 
-@app.route('/<chan>/mine', methods=['GET'])
-def mine(chan):
-    # ensure we have messages to commit to the blockchain
-    if not black.CHANNELS[chan].chain.current_msgs:
-        response = {
-            'message': 'No messages to commit to the blockchain',
-        }
-        return jsonify(response), 200
-    # We run the proof of work algorithm to get the next proof...
-    last_block = black.CHANNELS[chan].chain.last_block
-    last_proof = last_block['proof']
-    proof = black.CHANNELS[chan].chain.proof_of_work(last_proof)
-
-    # Forge the new Block by adding it to the chain
-    block = black.CHANNELS[chan].chain.new_block(proof)
-
-    response = {
-        'message': "New Block Forged",
-        'index': block['index'],
-        'messages': block['messages'],
-        'proof': block['proof'],
-        'previous_hash': block['previous_hash'],
-    }
-    return jsonify(response), 200
-
-
 @app.route('/<chan>/nodes/resolve', methods=['GET'])
 def consensus(chan):
-    replaced = black.CHANNELS[chan].chain.resolve_conflicts()
+    replaced = black.CHANNELS[chan].chain.resolve_conflicts(chan)
+    authority = black.CHANNELS[chan].chain.authority.votes
+    chain = black.CHANNELS[chan].chain.chain
 
     if replaced:
         response = {
             'message': 'Our chain was replaced',
-            'new_chain': black.CHANNELS[chan].chain.chain
+            'new_chain': chain,
+            'new_authority': [e.__dict__ for e in authority],
         }
     else:
         response = {
             'message': 'Our chain is authoritative',
-            'chain': black.CHANNELS[chan].chain.chain
+            'chain': chain,
+            'authority': [e.__dict__ for e in authority],
         }
 
     return jsonify(response), 200
@@ -135,12 +114,38 @@ def new_transaction(chan):
     return jsonify(response), 201
 
 
+@app.route('/<chan>/votes/new', methods=['POST'])
+def new_vote(chan):
+    values = request.get_json()
+
+    # Check that the required fields are in the POST'ed data
+    required = ['vote', 'pub_key', 'signature']
+    if not all(k in values for k in required):
+        return 'Missing values', 400
+
+    # Create a new vote
+    vote = authority.Vote(values['vote'], values['pub_key'], values['signature'])
+    if black.CHANNELS[chan].chain.authority.vote(vote):
+        response = {'message': f'Vote added'}
+        return jsonify(response), 201
+    else:
+        return jsonify({'message': 'No authority or bad signature or bad last sig reference'}, 401)
+
+
+
 @app.route('/<chan>/chain', methods=['GET'])
 def full_chain(chan):
     chain = black.CHANNELS[chan].chain.chain
+    authority = black.CHANNELS[chan].chain.authority.votes
     response = {
-        'chain': chain,
-        'length': len(chain),
+        'messages': {
+            'chain': chain,
+            'length': len(chain),
+        },
+        'authority': {
+            'chain': [e.__dict__ for e in authority],
+            'length': len(authority),
+        },
     }
     return jsonify(response), 200
 
