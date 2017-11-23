@@ -2,6 +2,7 @@ version: '3'
 services:
     node1:
       build: .
+      image: "black"
       container_name: "node1"
       networks:
         - black-net
@@ -11,6 +12,7 @@ services:
          - ".:/app"
     node2:
       build: .
+      image: "black"
       container_name: "node2"
       networks:
         - black-net
