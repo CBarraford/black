@@ -6,34 +6,46 @@ set -e
 # create channel
 chan=$(curl -sfH "Content-Type: application/json" -X POST -d '{"name": "general"}' "http://localhost:5001/channels/new" | jq -r .channel)
 
+# user 1
+# 81CF41902067A8FD87CBBE9D848CC883B1E5D86CC98A1F42
+# A680D7FA501DFB13A8CB160E07A22355A52EC7274708C4151BD0794CC4964F93B6581CD766B2B2568696279D3F1B0FA9
+
+# user 2
+# 429C7DEF6EF1FF57B2CADF6DA068DB4E5617313967F729CE
+# F0B21748031A3652AFC11615AB6CA875182BE975D34E1E1CC05F0B96116B7770AF1D771800EA9D4A9BC41178AB5DD9A0
+
+# vote to give self authority
+curl -fH "Content-Type: application/json" -X POST -d '{
+  "vote": "1 A680D7FA501DFB13A8CB160E07A22355A52EC7274708C4151BD0794CC4964F93B6581CD766B2B2568696279D3F1B0FA9 init",
+  "pub_key": "A680D7FA501DFB13A8CB160E07A22355A52EC7274708C4151BD0794CC4964F93B6581CD766B2B2568696279D3F1B0FA9",
+  "signature": "20183B0DE2680293B864EBB482FFEFD383DDBE8F34A553BE84C5945F81F281BEB2AB7FA98738894BE3547C35CDD21E12"}
+  ' "http://localhost:5001/$chan/votes/new"
+
+# vote to give second user authority
+curl -fH "Content-Type: application/json" -X POST -d '{
+  "vote": "1 F0B21748031A3652AFC11615AB6CA875182BE975D34E1E1CC05F0B96116B7770AF1D771800EA9D4A9BC41178AB5DD9A0 20183B0DE2680293B864EBB482FFEFD383DDBE8F34A553BE84C5945F81F281BEB2AB7FA98738894BE3547C35CDD21E12",
+  "pub_key": "A680D7FA501DFB13A8CB160E07A22355A52EC7274708C4151BD0794CC4964F93B6581CD766B2B2568696279D3F1B0FA9",
+  "signature": "B5DD3D0E2FA868D6D187C5141064AB324A25F0CA30ECF80ADD3AA4045A5EA511574C500E913F0344D9E4048AD3BFF150"}
+  ' "http://localhost:5001/$chan/votes/new"
+
 # Connect nodes
 curl -fH "Content-Type: application/json" -X POST -d '{"remote_node": "http://node1:5000", "local_node": "http://node2:5000", "chan": "'"$chan"'"}' "http://localhost:5002/join"
-
-# add a message to the general chat
-curl -fH "Content-Type: application/json" -X POST -d '{
-  "pub_key": "-----BEGIN PUBLIC KEY-----\nMEkwEwYHKoZIzj0CAQYIKoZIzj0DAQEDMgAEUCXFlazfro8jch6LGcKaTd/HSZvC\nKT0aIPceW8JsOS5M82FMzkMRrtfuG5Kgi/Pa\n-----END PUBLIC KEY-----\n", 
-  "signature": "8312DC578E8249E10877877066E82223BF31AD48207B51EB3389AF9D625FD503F2136297751E92657D18580BCCAFED3C",
-  "message":"Hello World!"}
-  ' "http://localhost:5001/$chan/transactions/new"
-curl -fH "Content-Type: application/json" -X POST -d '{
-  "pub_key": "-----BEGIN PUBLIC KEY-----\nMEkwEwYHKoZIzj0CAQYIKoZIzj0DAQEDMgAEmKKhw/PJNmDMqtpNRXexw+l+sand\nBwVSdC0AgZ/Pj2O5e4a3SRvYRoIbYPOUC/Fq\n-----END PUBLIC KEY-----\n", 
-  "signature": "E5FFF16FB17B5EBA0240D4083AEB8EDF90AA9610627DF015C2023233987A455F11BDB6959C7D872EDE4ED6B4F22E8C8A",
-  "message":"Hello World also!"}
-  ' "http://localhost:5002/$chan/transactions/new"
-
-# mine it
-curl -f "http://localhost:5001/$chan/mine"
 
 # resolve
 curl -f "http://localhost:5001/$chan/nodes/resolve"
 curl -f "http://localhost:5002/$chan/nodes/resolve"
 
-# check chains
-curl -f "http://localhost:5001/$chan/chain"
-curl -f "http://localhost:5002/$chan/chain"
-
-# mine the second node
-curl -f "http://localhost:5002/$chan/mine"
+# add a message to the general chat
+curl -fH "Content-Type: application/json" -X POST -d '{
+  "pub_key": "A680D7FA501DFB13A8CB160E07A22355A52EC7274708C4151BD0794CC4964F93B6581CD766B2B2568696279D3F1B0FA9", 
+  "signature": "BF09D9775951B46EE989B5BED31F5D77E0AFCBEDFBE960E505C318B8F37CC07EA378A958F6EB29653899187B87A2EB6B",
+  "message":"Hello World"}
+  ' "http://localhost:5001/$chan/transactions/new"
+curl -fH "Content-Type: application/json" -X POST -d '{
+  "pub_key": "F0B21748031A3652AFC11615AB6CA875182BE975D34E1E1CC05F0B96116B7770AF1D771800EA9D4A9BC41178AB5DD9A0", 
+  "signature": "A100468C7A54DC981D46FD626BF1A65DF589B013ABAEE97D99DA34CDE2F978AB55F5D6086DFB7C20734B9C0B1DF948A0",
+  "message":"Hello World also"}
+  ' "http://localhost:5002/$chan/transactions/new"
 
 # resolve
 curl -f "http://localhost:5001/$chan/nodes/resolve"
