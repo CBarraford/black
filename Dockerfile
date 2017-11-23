@@ -8,4 +8,4 @@ EXPOSE 5000
 
 WORKDIR /app
 
-ENTRYPOINT [ "python", "/app/black.py", "--port", "5000"  ]
+CMD [ "python", "/app/black.py", "--port", "5000"  ]
